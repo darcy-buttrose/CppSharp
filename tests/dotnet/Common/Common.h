@@ -541,6 +541,7 @@ public:
     TestProperties& operator=(const TestProperties& other);
     int Field;
     const int& ConstRefField;
+    int& RefField;
 
     int getFieldValue();
     void setFieldValue(int Value);

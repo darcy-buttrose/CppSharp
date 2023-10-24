@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using CppSharp.AST;
 using CppSharp.AST.Extensions;
@@ -136,6 +137,8 @@ namespace CppSharp.Generators.CSharp
 
         public override bool VisitPointerType(PointerType pointer, TypeQualifiers quals)
         {
+            Console.WriteLine($"/// visit-pointer-type");
+            
             if (!VisitType(pointer, quals))
                 return false;
 
@@ -170,6 +173,8 @@ namespace CppSharp.Generators.CSharp
                 return true;
             }
 
+            Console.WriteLine($"/// visit-pointer-type => pointer -> {pointer}");
+            
             if (Context.Context.Options.MarshalCharAsManagedChar &&
                 primitive == PrimitiveType.Char)
                 Context.Return.Write($"({pointer}) ");
@@ -191,13 +196,17 @@ namespace CppSharp.Generators.CSharp
                 }
             }
 
-            if (new QualifiedType(pointer, quals).IsConstRefToPrimitive())
+            var qualifiedType = new QualifiedType(pointer, quals);
+            if (qualifiedType.IsRefToPrimitive())
             {
-                Context.Return.Write("*");
+                if (qualifiedType.IsConst())
+                    Context.Return.Write("*");
                 if (Context.MarshalKind == MarshalKind.NativeField)
                     Context.Return.Write($"({pointer.QualifiedPointee.Visit(typePrinter)}*) ");
             }
 
+            Console.WriteLine($"/// visit-pointer-type => return-var-name -> {Context.ReturnVarName}");
+            
             Context.Return.Write(Context.ReturnVarName);
             return true;
         }
@@ -671,10 +680,11 @@ namespace CppSharp.Generators.CSharp
 
         public override bool VisitPrimitiveType(PrimitiveType primitive, TypeQualifiers quals)
         {
+            Console.WriteLine($"/// visit-primitive-type => {primitive}");
             switch (primitive)
             {
                 case PrimitiveType.Bool:
-                    if (Context.MarshalKind == MarshalKind.NativeField)
+                    if (!Context.ReturnType.Type.IsReference() && !Context.ReturnType.Type.IsPointer() && Context.MarshalKind == MarshalKind.NativeField)
                     {
                         // returned structs must be blittable and bool isn't
                         Context.Return.Write("(byte) ({0} ? 1 : 0)", Context.Parameter.Name);

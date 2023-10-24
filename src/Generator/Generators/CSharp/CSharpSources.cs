@@ -1058,11 +1058,12 @@ internal static bool {Helpers.TryGetNativeToManagedMappingIdentifier}(IntPtr nat
             if (ctx.HasCodeBlock)
                 Indent();
 
+            
             if (marshal.Context.Return.StringBuilder.Length > 0)
             {
                 if (ctx.ReturnVarName.Length > 0)
                     Write($"{ctx.ReturnVarName} = ");
-                if (type.IsPointer())
+                if (type.IsPointer() || type.IsReference())
                 {
                     Type pointee = type.GetFinalPointee();
                     if (pointee.IsPrimitiveType())
@@ -1073,6 +1074,7 @@ internal static bool {Helpers.TryGetNativeToManagedMappingIdentifier}(IntPtr nat
                             Write("(object) ");
                     }
                 }
+                Console.WriteLine($"/// setter => argument-prefix -> {marshal.Context.ArgumentPrefix} || return -> {marshal.Context.Return}");
                 WriteLine($"{marshal.Context.ArgumentPrefix}{marshal.Context.Return};");
             }
 
@@ -2567,7 +2569,16 @@ internal static{(@new ? " new" : string.Empty)} {printedClass} __GetInstance({Ty
                     var printed = TypePrinter.PrintNative(@class);
                     string defaultValue = string.Empty;
                     if (copyCtorMethod.Parameters.Count > 1)
-                        defaultValue = $", {ExpressionPrinter.VisitParameter(copyCtorMethod.Parameters.Last())}";
+                    {
+                        var lastParam = copyCtorMethod.Parameters.Last();
+                        var visit = ExpressionPrinter.VisitParameter(lastParam);
+                        if (lastParam.Type.IsPointer() && visit == "0")
+                        {
+                            visit = "IntPtr.Zero";
+                        }
+                        defaultValue = $", {visit}";
+                    }
+
                     WriteLine($@"var ret = Marshal.AllocHGlobal(sizeof({@internal}));");
                     WriteLine($@"{printed}.{GetFunctionNativeIdentifier(copyCtorMethod)}(ret, new {TypePrinter.IntPtrType}(&native){defaultValue});",
                         printed, GetFunctionNativeIdentifier(copyCtorMethod));

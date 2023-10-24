@@ -367,13 +367,18 @@
             return desugared.IsReference() && type.IsConst();
         }
 
-        public static bool IsConstRefToPrimitive(this QualifiedType type)
+        public static bool IsRefToPrimitive(this QualifiedType type)
         {
             Type desugared = type.Type.Desugar();
             Type pointee = desugared.GetFinalPointee().Desugar();
             pointee = (pointee.GetFinalPointee() ?? pointee).Desugar();
             return desugared.IsReference() &&
-                (pointee.IsPrimitiveType() || pointee.IsEnum()) && type.IsConst();
+                (pointee.IsPrimitiveType() || pointee.IsEnum());
+        }
+
+        public static bool IsConstRefToPrimitive(this QualifiedType type)
+        {
+            return type.IsRefToPrimitive() && type.IsConst();
         }
 
         public static bool IsConst(this QualifiedType type)
