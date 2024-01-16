@@ -124,6 +124,12 @@ namespace CppSharp
 
             var driverOptions = driver.Options;
             driverOptions.GeneratorKind = options.Kind;
+            driverOptions.GenerationOutputMode = options.UnityBuild
+                ? GenerationOutputMode.FilePerUnit
+                : GenerationOutputMode.FilePerModule;
+            
+            Console.WriteLine($"driverOptions.GenerationOutputMode({driverOptions.GenerationOutputMode})");
+            
             var module = driverOptions.AddModule(options.OutputFileName);
 
             if (!string.IsNullOrEmpty(options.InputLibraryName))
