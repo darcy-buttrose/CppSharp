@@ -870,7 +870,6 @@ internal static bool {Helpers.TryGetNativeToManagedMappingIdentifier}(IntPtr nat
 
                 Console.WriteLine($"GenerateClassInternalsFields -> {field.Name}");
                 
-                WriteLine($"// here");
                 Write($"internal {retType}");
                 if (field.Expression != null)
                 {
