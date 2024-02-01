@@ -1653,8 +1653,8 @@ namespace CppSharp
 
                 foreach (var classField in _class.Fields)
                 {
-                    var layoutField = @_class.Layout.Fields.SingleOrDefault(lf => lf.Name == classField.Name);
-                    if (layoutField != null)
+                    var layoutFields = @_class.Layout.Fields.Where(lf => lf.Name == classField.Name);
+                    foreach (var layoutField in layoutFields)
                     {
                         layoutField.PreprocessedEntities = classField.PreprocessedEntities.Select(pe => pe).ToList();
                     }
