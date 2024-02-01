@@ -840,12 +840,16 @@ internal static bool {Helpers.TryGetNativeToManagedMappingIdentifier}(IntPtr nat
             {
                 var field = fields[i];
 
-                var expansions = field.PreprocessedEntities.OfType<MacroExpansion>();
-                
-                Console.WriteLine($"GenerateClassInternalsFields -> {field.Name} {expansions.Any(e => e.Text == "CS_IGNORE")}");
-                
-                if (expansions.Any(e => e.Text == "CS_IGNORE")) continue;
-                
+                if (field.PreprocessedEntities != null)
+                {
+                    var expansions = field.PreprocessedEntities.OfType<MacroExpansion>();
+
+                    Console.WriteLine(
+                        $"GenerateClassInternalsFields -> {field.Name} {expansions.Any(e => e.Text == "CS_IGNORE")}");
+
+                    if (expansions.Any(e => e.Text == "CS_IGNORE")) continue;
+                }
+
                 TypePrinterResult retType = TypePrinter.VisitFieldDecl(
                     new Field { Name = field.Name, QualifiedType = field.QualifiedType });
 
