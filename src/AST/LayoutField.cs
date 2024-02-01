@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CppSharp.AST
 {
@@ -10,6 +11,7 @@ namespace CppSharp.AST
         public IntPtr FieldPtr { get; set; }
         public bool IsVTablePtr { get { return FieldPtr == IntPtr.Zero; } }
         public ExpressionObsolete Expression { get; set; }
+        public IList<PreprocessedEntity> PreprocessedEntities { get; set; }
 
         public override string ToString()
         {

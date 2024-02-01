@@ -63,6 +63,7 @@ namespace CppSharp.Passes
             if (AlreadyVisited(decl))
                 return false;
 
+            Console.WriteLine($"VisitDeclaration -> {decl.Name}");
             if (decl is DeclarationContext && !(decl is Class) && !(decl is Function))
                 return true;
 
@@ -77,6 +78,8 @@ namespace CppSharp.Passes
 
         void CheckIgnoreMacros(Declaration decl, IEnumerable<MacroExpansion> expansions)
         {
+            Console.WriteLine($"CheckIgnoreMacros -> {decl.Name} {expansions.Any(e => e.Text == Prefix + "_IGNORE")}");
+            
             if (expansions.Any(e => e.Text == Prefix + "_IGNORE" &&
                                     e.MacroLocation != MacroLocation.ClassBody &&
                                     e.MacroLocation != MacroLocation.FunctionBody &&
@@ -92,6 +95,8 @@ namespace CppSharp.Passes
                                     e.MacroLocation != MacroLocation.FunctionBody &&
                                     e.MacroLocation != MacroLocation.FunctionParameters))
                 decl.GenerationKind = GenerationKind.Internal;
+            
+            Console.WriteLine($"CheckIgnoreMacros -> {decl.Name} {decl.GenerationKind}");
         }
 
         public override bool VisitTranslationUnit(TranslationUnit unit)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using SourceLocation = CppSharp.AST.SourceLocation;
 using CppSharp.Parser.AST;
 using CppSharp.AST.Extensions;
@@ -254,6 +255,7 @@ namespace CppSharp
                 case DeclarationKind.Field:
                     {
                         var _decl = Field.__CreateInstance(decl.__Instance);
+                        Console.WriteLine($"Visit -> VisitField");
                         return VisitField(_decl);
                     }
                 case DeclarationKind.AccessSpecifier:
@@ -1566,8 +1568,13 @@ namespace CppSharp
         public override AST.Declaration VisitField(Field decl)
         {
             var _field = new AST.Field();
+            
+            Console.WriteLine($"VisitField -> VisitDeclaration");
+            
             VisitDeclaration(decl, _field);
 
+            Console.WriteLine($"VisitField -> {_field.Name}");
+            
             _field.QualifiedType = typeConverter.VisitQualified(
                 decl.QualifiedType);
             _field.Access = VisitAccessSpecifier(decl.Access);
@@ -1588,6 +1595,8 @@ namespace CppSharp
 
         void VisitClass(Class @class, AST.Class _class)
         {
+            Console.WriteLine($"VisitClass -> {@class.Name}");
+            
             VisitDeclContext(@class, _class);
 
             for (uint i = 0; i < @class.BasesCount; ++i)
@@ -1600,6 +1609,7 @@ namespace CppSharp
             for (uint i = 0; i < @class.FieldsCount; ++i)
             {
                 var field = @class.GetFields(i);
+                Console.WriteLine($"VisitClass -> Visit");
                 var _field = Visit(field) as AST.Field;
                 _class.Fields.Add(_field);
             }
@@ -1632,12 +1642,22 @@ namespace CppSharp
 
             if (@class.Layout != null)
             {
+                Console.WriteLine($"VisitClass -> VisitClassLayout {@class.Name}");
                 _class.Layout = VisitClassLayout(@class.Layout);
                 if (_class.BaseClass != null)
                 {
                     AST.LayoutBase @base = _class.Layout.Bases.Find(
                         b => b.Class == _class.BaseClass);
                     _class.BaseClass.Layout.HasSubclassAtNonZeroOffset = @base.Offset > 0;
+                }
+
+                foreach (var classField in _class.Fields)
+                {
+                    var layoutField = @_class.Layout.Fields.SingleOrDefault(lf => lf.Name == classField.Name);
+                    if (layoutField != null)
+                    {
+                        layoutField.PreprocessedEntities = classField.PreprocessedEntities.Select(pe => pe).ToList();
+                    }
                 }
             }
         }
@@ -1667,6 +1687,7 @@ namespace CppSharp
 
         AST.ClassLayout VisitClassLayout(ClassLayout layout)
         {
+            Console.WriteLine($"VisitClassLayout");
             var _layout = new AST.ClassLayout
             {
                 ABI = VisitCppAbi(layout.ABI),
@@ -1689,6 +1710,7 @@ namespace CppSharp
             for (uint i = 0; i < layout.FieldsCount; i++)
             {
                 var field = layout.GetFields(i);
+                
                 var _field = new AST.LayoutField();
                 _field.Offset = field.Offset;
                 _field.Name = field.Name;
