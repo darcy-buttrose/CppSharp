@@ -2704,6 +2704,8 @@ internal static{(@new ? " new" : string.Empty)} {printedClass} __GetInstance({Ty
 
         public void GenerateMethod(Method method, Class @class)
         {
+            Console.WriteLine($"GenerateMethod({@class.Name}::{method.Name})");
+            
             PushBlock(BlockKind.Method, method);
             GenerateDeclarationCommon(method);
 
@@ -2744,6 +2746,9 @@ internal static{(@new ? " new" : string.Empty)} {printedClass} __GetInstance({Ty
             }
 
             WriteOpenBraceAndIndent();
+            WriteLine("");
+            WriteLine("// here");
+            WriteLine($"Console.WriteLine(\"{@class.Name}::{method.Name}\");");
 
             if (method.IsProxy)
                 goto SkipImpl;
